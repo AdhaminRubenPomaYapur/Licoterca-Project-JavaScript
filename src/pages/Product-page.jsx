@@ -7,51 +7,72 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faEdit, faTrashAlt} from '@fortawesome/free-solid-svg-icons';
 import 'bootstrap/dist/css/bootstrap.css';
 
-const url = "http://localhost:3000/api/products";
+const urlProducts    = "http://localhost:3000/api/products";
+const urlInventories = "http://localhost:3000/api/inventories";
 
 class ProductPage extends Component {
 
     state = {
-        data: [],
-        modalInsertar: false,
-        modalEliminar: false,
-        form: {
+        dataProduct     : [],
+        dataInventories : [],
+
+        modalInsertar   : false,
+        modalEliminar   : false,
+
+        inventoryForm: {
+            id       : '',
+            type     : '',
+            stock    : 0,
+            products : [],
+        },
+        productForm: {
             id           : '',
             name         : '',
             description  : '',
-            stockmin     : 0,
-            stockmax     : 0,
             stock        : 0,
             price        : 0,
             productids   : [],
             state        : false,
             created      : '',
         },
+
         typeModal : '',
     }
     
     peticionGet = () => {
-        axios.get(url).then(response => {
-            this.setState({data: response.data.products})
+        axios.get(urlProducts).then(response => {
+            this.setState({dataProduct: response.data.products})
+        }).catch(error => console.log(error.message));
+    }
+
+    peticionGetInventories = () => {
+        axios.get(urlInventories).then(response => {
+            this.setState({dataInventories: response.data.inventories})
         }).catch(error => console.log(error.message));
     }
 
     peticionPost = async () => {
-        await axios.post(url, {product: this.state.form}).then(response => {
+        await axios.post(urlProducts, {product: this.state.productForm}).then(async response => {
+            await this.peticionPostInventoryAddProduct(response.data.product.id);
             this.modalInsertar();
             this.peticionGet();
         }).catch(error => console.log(error.message));
     }
 
+    peticionPostInventoryAddProduct = async (id) => {
+        await axios.post(urlInventories+`/${this.state.inventoryForm.id}`, {product_id: id}).then(response => {
+        }).catch(error => console.log(error.message));
+    }
+
     peticionPut = () => {
-        axios.put(url+`/${this.state.form.id}`, {product: this.state.form}).then( response => {
+        axios.put(urlProducts+`/${this.state.productForm.id}`, {product: this.state.productForm}).then( response => {
             this.modalInsertar();
             this.peticionGet();
         }).catch(error => console.log(error.message));
     }
 
     peticionDelete = () => {
-        axios.delete(url+`/${this.state.form.id}`).then( response => {
+        axios.delete(urlProducts+`/${this.state.productForm.id}`).then( response => {
             this.setState({modalEliminar: false});
             this.peticionGet();
         })
@@ -63,8 +84,8 @@ class ProductPage extends Component {
     
     selectProduct = (product) => {
         this.setState({
-            typeModal : 'update',
-            form: {
+            typeModal   : 'update',
+            productForm : {
                 id           : product.id,
                 name         : product.name,
                 description  : product.description,
@@ -79,24 +100,37 @@ class ProductPage extends Component {
         })
     }
 
+
     handleChange = async (evt) => {
         evt.persist();
         await this.setState({
-            form: {
-            ...this.state.form,
+            productForm: {
+            ...this.state.productForm,
             [evt.target.name]: evt.target.value
             }
         })
-        console.log(this.state.form)
+        console.log(this.state.productForm)
+    }
+
+    handleChangeInventory = async (evt) => {
+        evt.persist();
+        await this.setState({
+            inventoryForm: {
+            ...this.state.inventoryForm,
+            [evt.target.name]: evt.target.value
+            }
+        })
+        console.log(this.state.inventoryForm)
     }
 
     componentDidMount() {
         this.peticionGet();
+        this.peticionGetInventories();
     }
 
     render() {
 
-        const {form} = this.state;
+        const {productForm: form} = this.state;
 
         return(
             <>
@@ -122,7 +156,7 @@ class ProductPage extends Component {
                             </thead>
                             <tbody>
                                 {
-                                this.state.data.map((product) => {
+                                this.state.dataProduct.map((product) => {
                                     return (
                                     <tr key={product.id}>
                                         <td>{product.name}</td>
@@ -144,59 +178,62 @@ class ProductPage extends Component {
                             
 
                             <Modal isOpen={this.state.modalInsertar}>
-                            <ModalHeader>
-                                Add Product
-                            </ModalHeader>
+                                <ModalHeader>
+                                    Add Product
+                                </ModalHeader>
 
-                            <ModalBody>
+                                <ModalBody>
 
-                                <FormGroup>
-                                <Label>Name:</Label>
-                                <Input className='form-control' type='text' name='name' onChange={this.handleChange} value={form?form.name : form.name}/>
-                                </FormGroup>
+                                    <FormGroup>
+                                    <Label>Name:</Label>
+                                    <Input className='form-control' type='text' name='name' onChange={this.handleChange} value={form?form.name : form.name}/>
+                                    </FormGroup>
 
-                                <FormGroup>
-                                <Label>Lastname:</Label>
-                                <Input className='form-control' type='text' name='lastname'  onChange={this.handleChange} value={form?form.lastname : form.lastname}/>
-                                </FormGroup>
-                        
-                                <FormGroup>
-                                <Label>Email:</Label>
-                                <Input className='form-control' type='text' name='email'  onChange={this.handleChange} value={form?form.email : form.email}/>
-                                </FormGroup>
-                        
-                                <FormGroup>
-                                <Label>Password:</Label>
-                                <Input className='form-control' type='text' name='password'  onChange={this.handleChange} value={form?form.password : form.password}/>
-                                </FormGroup>
-                        
-                                <FormGroup>
-                                <Label>Cell phone:</Label>
-                                <Input className='form-control' type='text' name='cellphone'  onChange={this.handleChange} value={form?form.cellphone : form.cellphone}/>
-                                </FormGroup>
+                                    <FormGroup>
+                                    <Label>description:</Label>
+                                    <Input className='form-control' type='text' name='description'  onChange={this.handleChange} value={form?form.description : form.description}/>
+                                    </FormGroup>
+                                    
+                                    <FormGroup>
+                                    <Label>Select inventory:</Label>
+                                    <Input 
+                                        className='form-control'
+                                        type='select' 
+                                        name='id'
+                                        onChange={this.handleChangeInventory}
+                                    >
+                                        { 
+                                            this.state.dataInventories.map(inventory => {
+                                                return (
+                                                    <option key={inventory.id} value={inventory.id}>{inventory.type}</option>
+                                                )
+                                            })
+                                        }
+                                    </Input>
+                                    </FormGroup>
 
-                            </ModalBody>
+                                </ModalBody>
 
-                            <ModalFooter>
-                                {
-                                this.state.typeModal === 'insert' ?
-                                <button className='btn btn-success' onClick={() => this.peticionPost()}>Insert</button>
-                                :
-                                <button className='btn btn-primary' onClick={() => this.peticionPut() }>Update</button>
-                                }
-                                <Button color='secundary' onClick={this.modalInsertar}>Cancel</Button>
-                            </ModalFooter>
+                                <ModalFooter>
+                                    {
+                                    this.state.typeModal === 'insert' ?
+                                    <button className='btn btn-success' onClick={() => {this.peticionPost()}}>Insert</button>
+                                    :
+                                    <button className='btn btn-primary' onClick={() => this.peticionPut() }>Update</button>
+                                    }
+                                    <Button color='secundary' onClick={this.modalInsertar}>Cancel</Button>
+                                </ModalFooter>
 
-                            </Modal>
+                                </Modal>
 
-                            <Modal isOpen={this.state.modalEliminar}>
-                            <ModalBody>
-                                Estas seguro que deseas eliminar a esta persona {form && form.name}
-                            </ModalBody>
-                            <ModalFooter>
-                                <button className='btn btn-danger'    onClick={() => this.peticionDelete()}>Yes</button>
-                                <button className='btn btn-secundary' onClick={() => this.setState({modalEliminar: false})}>No</button>
-                            </ModalFooter>
+                                <Modal isOpen={this.state.modalEliminar}>
+                                <ModalBody>
+                                    Estas seguro que deseas eliminar a esta persona {form && form.name}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <button className='btn btn-danger'    onClick={() => this.peticionDelete()}>Yes</button>
+                                    <button className='btn btn-secundary' onClick={() => this.setState({modalEliminar: false})}>No</button>
+                                </ModalFooter>
                             </Modal>
 
                         </div>

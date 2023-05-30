@@ -79,7 +79,6 @@ class ClientPage extends Component {
             [evt.target.name]: evt.target.value
             }
         })
-        console.log(this.state.form)
     }
 
     componentDidMount() {
