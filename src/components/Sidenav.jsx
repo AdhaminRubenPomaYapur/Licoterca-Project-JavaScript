@@ -70,7 +70,7 @@ export default function Sidenav() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
-  const namePages = ['client', 'supplier', 'employee', 'purchase', 'sale'];
+  const namePages = ['product', 'client', 'supplier', 'employee', 'purchase', 'sale'];
 
   return (
     <Box sx={{ display: 'flex' }}>
