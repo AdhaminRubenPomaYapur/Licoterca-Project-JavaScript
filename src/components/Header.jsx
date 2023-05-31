@@ -1,13 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import './Header.css';
 
-export const Header = () => {
+export const Header = ( {carProducts, setCarProducts} ) => {
+
+	const [active, setActive] = useState(false);
+
+	const sale = () => {
+
+		let products = [];
+
+		carProducts.forEach(product => {
+			const productMap = new Map();
+			productMap.set('id',     product.id)
+			productMap.set('name',   product.name)
+			productMap.set('amount', product.amount)
+			productMap.set('price',  product.price)
+			products.push(productMap)
+		});
+
+		console.log(products);
+	}
+
     return(
         <header>
 			<h1>Tienda</h1>
 
 			<div className="container-icon">
-				<div className="container-cart-icon">
+				<div className="container-cart-icon" onClick={() => setActive(!active)}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
@@ -27,36 +46,60 @@ export const Header = () => {
 					</div>
 				</div>
 
-				<div className="container-cart-products hidden-cart">
-					<div className="row-product hidden">
-						<div className="cart-product">
-							<div className="info-cart-product">
-								<span className="cantidad-producto-carrito">1</span>
-								<p className="titulo-producto-carrito">Zapatos Nike</p>
-								<span className="precio-producto-carrito">$80</span>
-							</div>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth="1.5"
-								stroke="currentColor"
-								className="icon-close"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
-						</div>
-					</div>
+				<div className={`container-cart-products ${active ? '' : 'hidden-cart'}`}>
+					{
+						carProducts.length ? (
+							<>
+								<div className="row-product">
+									{
+										carProducts.map(carProduct => (
+											<div className="cart-product" key={carProduct.id}>
+												<div className="info-cart-product">
+													<span className="cantidad-producto-carrito">{carProduct.amount}</span>
+													<p className="titulo-producto-carrito">{carProduct.name}</p>
+													<span className="precio-producto-carrito">${carProduct.price}</span>
+												</div>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													fill="none"
+													viewBox="0 0 24 24"
+													strokeWidth="1.5"
+													stroke="currentColor"
+													className="icon-close"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														d="M6 18L18 6M6 6l12 12"
+													/>
+												</svg>
+											</div>
+										))
+									}
+									
+								</div>
 
-					<div className="cart-total hidden">
-						<h3>Total:</h3>
-						<span className="total-pagar">$200</span>
-					</div>
-					<p className="cart-empty">El carrito está vacío</p>
+								<div className="cart-total hidden">
+									<h3>Total:</h3>
+									<span className="total-pagar">$200</span>
+								</div>
+
+								<div className="cart-total">
+									<select name="select" id="id">
+										<option value="value1">Option 1</option>
+										<option value="value2">Option 2</option>
+										<option value="value3">Option 3</option>
+									</select>
+								</div>
+
+								<div className="cart-total">
+									<button onClick={() => sale()}>Vender</button>
+								</div>
+							</>
+						) : (
+							<p className="cart-empty">El carrito está vacío</p>
+						)
+					}
 				</div>
 			</div>
 		</header>
