@@ -9,15 +9,34 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 const urlProducts    = "http://localhost:3000/api/products";
 const urlInventories = "http://localhost:3000/api/inventories";
+const urlSuppliers   = "http://localhost:3000/api/suppliers";
+const urlCatalogs    = "http://localhost:3000/api/catalogs";
 
 class ProductPage extends Component {
 
     state = {
-        dataProduct     : [],
-        dataInventories : [],
+        dataProduct         : [],
+        dataInventories     : [],
+        dataSuppliers       : [],
+        dataCatalogs        : [],
+        dataProductsCatalog : [],
 
         modalInsertar   : false,
+        modalAddRef     : false,
         modalEliminar   : false,
+
+        supplier        : '',
+        catalog         : '',
+        productCatalog  : '',
+        product         : '',
+
+        catalogsForm    : {
+            id        : '',
+            type      : '',
+            products  : [],
+            supplier  : '',
+            state     : false
+        },
 
         inventoryForm: {
             id       : '',
@@ -51,6 +70,18 @@ class ProductPage extends Component {
         }).catch(error => console.log(error.message));
     }
 
+    peticionGetSuppliers = () => {
+        axios.get(urlSuppliers).then(response => {
+            this.setState({dataSuppliers: response.data.suppliers})
+        }).catch(error => console.log(error.message));
+    }
+
+    peticionGetCatalogsBySuppliers = () => {
+        axios.get(urlCatalogs+`/${this.state.supplier}`).then(response => {
+            this.setState({dataCatalogs: response.data.catalogs})
+        }).catch(error => console.log(error.message));
+    }
+
     peticionPost = async () => {
         await axios.post(urlProducts, {product: this.state.productForm}).then(async response => {
             await this.peticionPostInventoryAddProduct(response.data.product.id);
@@ -80,6 +111,10 @@ class ProductPage extends Component {
 
     modalInsertar = () => {
         this.setState({modalInsertar: !this.state.modalInsertar})
+    }
+
+    modalAddRef = () => {
+        this.setState({modalAddRef: !this.state.modalAddRef})
     }
     
     selectProduct = (product) => {
@@ -123,9 +158,52 @@ class ProductPage extends Component {
         console.log(this.state.inventoryForm)
     }
 
+    handleChangeSupplier = async (evt) => {
+        evt.persist();
+        await this.setState({
+            supplier: evt.target.value
+        })
+        this.peticionGetCatalogsBySuppliers();
+        console.log(this.state.supplier)
+    }
+
+    handleCatalog = async (evt) => {
+        evt.persist();
+        await this.setState({
+            catalog: evt.target.value
+        })
+        this.handleProducts();
+        console.log(this.state.catalog)
+    }
+
+    handleProducts = () => {
+        this.state.dataCatalogs.forEach(catalog => {
+            if(catalog.id === this.state.catalog) {
+                this.setState({dataProductsCatalog: catalog.products})
+            }
+        });
+    }
+
+    handleProductCatalog = async (evt) => {
+        evt.persist();
+        await this.setState({
+            productCatalog: evt.target.value
+        })
+        console.log(this.state.productCatalog)
+    }
+
+    handleProduct = async (evt) => {
+        evt.persist();
+        await this.setState({
+            product: evt.target.value
+        })
+        console.log(this.state.product)
+    }
+
     componentDidMount() {
         this.peticionGet();
         this.peticionGetInventories();
+        this.peticionGetSuppliers();
     }
 
     render() {
@@ -141,7 +219,7 @@ class ProductPage extends Component {
                             <br/>
                             <button className='btn btn-success' onClick={ () => {this.setState({form: {}, typeModal: 'insert'}), this.modalInsertar()}}>Add Product</button>
                             {" "}
-                            {/* <button className='btn btn-success' onClick={ () => {this.setState({form: {}, typeModal: 'insert'}), this.modalInsertar()}}>Add Product</button> */}
+                            <button className='btn btn-danger'  onClick={ () => {this.setState({form: {}, typeModal: 'addRef'}), this.modalAddRef()}}>Add Refer</button>
                             <br/> <br/>
 
                             <table className='table'>
@@ -221,17 +299,126 @@ class ProductPage extends Component {
 
                                 <ModalFooter>
                                     {
-                                    this.state.typeModal === 'insert' ?
-                                    <button className='btn btn-success' onClick={() => {this.peticionPost()}}>Insert</button>
-                                    :
-                                    <button className='btn btn-primary' onClick={() => this.peticionPut() }>Update</button>
+                                        this.state.typeModal === 'insert' 
+                                        ? <button className='btn btn-success' onClick={() => {this.peticionPost()}}>Insert</button>
+                                        : <button className='btn btn-primary' onClick={() => this.peticionPut() }>Update</button>
                                     }
                                     <Button color='secundary' onClick={this.modalInsertar}>Cancel</Button>
                                 </ModalFooter>
 
-                                </Modal>
+                            </Modal>
 
-                                <Modal isOpen={this.state.modalEliminar}>
+                            <Modal isOpen={this.state.modalAddRef}>
+                                <ModalHeader>
+                                    Add Referencia to Catalogo
+                                </ModalHeader>
+                                <ModalBody>
+
+                                    <FormGroup>
+                                        <Label>Select Supplier:</Label>
+                                        <Input 
+                                            className='form-control'
+                                            type='select'
+                                            name='supplier'
+                                            onChange={this.handleChangeSupplier}
+                                        >
+                                            { 
+                                                this.state.dataSuppliers.map(supplier => {
+                                                    return (
+                                                        <option key={supplier.id} value={supplier.id}>{`${supplier.name} ${supplier.lastname}`}</option>
+                                                    )
+                                                })
+                                            }
+                                        </Input>
+                                    </FormGroup>
+
+                                    {   
+                                        this.state.dataCatalogs.length > 0
+                                            ? (
+                                                <FormGroup>
+                                                    <Label>Select Catalog:</Label>
+                                                    <Input 
+                                                        className='form-control'
+                                                        type='select'
+                                                        name='catalog'
+                                                        onChange={this.handleCatalog}
+                                                    >
+                                                        { 
+                                                            this.state.dataCatalogs.map(catalog => {
+                                                                return (
+                                                                    <option key={catalog.id} value={catalog.id}>{catalog.type}</option>
+                                                                )
+                                                            })
+                                                        }
+                                                    </Input>
+                                                </FormGroup>
+                                            ) 
+                                            : (
+                                                <></>
+                                            )                                        
+                                    }
+
+                                    {   
+                                        this.state.dataProductsCatalog.length > 0
+                                            ? (
+                                                <FormGroup>
+                                                    <Label>Select Product Catalog:</Label>
+                                                    <Input 
+                                                        className='form-control'
+                                                        type='select'
+                                                        name='product'
+                                                        onChange={this.handleProductCatalog}
+                                                    >
+                                                        { 
+                                                            this.state.dataProductsCatalog.map(product => {
+                                                                return (
+                                                                    <option key={product.id} value={product.id}>{product.name}</option>
+                                                                )
+                                                            })
+                                                        }
+                                                    </Input>
+                                                </FormGroup>
+                                            ) 
+                                            : (
+                                                <></>
+                                            )                                        
+                                    }
+
+                                    {   
+                                        this.state.dataProduct.length > 0
+                                            ? (
+                                                <FormGroup>
+                                                    <Label>Select Product:</Label>
+                                                    <Input 
+                                                        className='form-control'
+                                                        type='select'
+                                                        name='product'
+                                                        onChange={this.handleProduct}
+                                                    >
+                                                        { 
+                                                            this.state.dataProduct.map(product => {
+                                                                return (
+                                                                    <option key={product.id} value={product.id}>{product.name}</option>
+                                                                )
+                                                            })
+                                                        }
+                                                    </Input>
+                                                </FormGroup>
+                                            ) 
+                                            : (
+                                                <></>
+                                            )                                        
+                                    }
+
+                                </ModalBody>
+
+                                <ModalFooter>                                    
+                                    <button className='btn btn-success' onClick={() => {this.addReft()}}>Insert</button>
+                                    <Button color='secundary' onClick={this.modalAddRef}>Cancel</Button>
+                                </ModalFooter>
+                            </Modal>
+
+                            <Modal isOpen={this.state.modalEliminar}>
                                 <ModalBody>
                                     Estas seguro que deseas eliminar a esta persona {form && form.name}
                                 </ModalBody>
