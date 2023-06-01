@@ -193,6 +193,11 @@ class ProductPage extends Component {
                                     <Label>description:</Label>
                                     <Input className='form-control' type='text' name='description'  onChange={this.handleChange} value={form?form.description : form.description}/>
                                     </FormGroup>
+
+                                    <FormGroup>
+                                    <Label>price:</Label>
+                                    <Input className='form-control' type='text' name='price'  onChange={this.handleChange} value={form?form.price : form.price}/>
+                                    </FormGroup>
                                     
                                     <FormGroup>
                                     <Label>Select inventory:</Label>
