@@ -7,6 +7,7 @@ import EmployeePage from './pages/Employee-page'
 import ProductPage from './pages/Product-page'
 import SalePage from './pages/Sale-page'
 import CatalogPage from './pages/Catalogo-page'
+import PurchasePage from './pages/Purchase-page'
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path='/product'   element={<ProductPage  />}  />
         <Route path='/catalogo'  element={<CatalogPage  />}  />
         <Route path='/sale'      element={<SalePage     />}  />
+        <Route path='/purchase'  element={<PurchasePage />}  />
       </Routes>
     </>
   )

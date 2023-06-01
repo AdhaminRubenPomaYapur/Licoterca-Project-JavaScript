@@ -37,6 +37,12 @@ export const ProductList = ( {carProducts, setCarProducts} ) => {
                 allProducts.map(product => {
                     return (
                         <div className="item" key={product.id}>
+                            <figure>
+                                <img 
+                                    src="https://www.cervezasalhambra.com/themes/alhambra/assets/img/home/roja-banner-home-slider-mb.jpg"
+                                    alt={product.name}
+                                />
+                            </figure>
                             <div className="info-product">
                                 <h2>{product.name}</h2>
                                 <p className="price">Bs.- {product.price}</p>
