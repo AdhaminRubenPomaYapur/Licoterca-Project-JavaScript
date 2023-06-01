@@ -90,6 +90,12 @@ class ProductPage extends Component {
         }).catch(error => console.log(error.message));
     }
 
+    peticionPostAddRefProductToCatalog = async () => {
+        await axios.post(urlProducts+`/${this.state.product}`, {product_id: this.state.productCatalog}).then(response => {
+            this.modalAddRef()
+        }).catch(error => console.log(error.message))
+    }
+
     peticionPostInventoryAddProduct = async (id) => {
         await axios.post(urlInventories+`/${this.state.inventoryForm.id}`, {product_id: id}).then(response => {
         }).catch(error => console.log(error.message));
@@ -413,7 +419,7 @@ class ProductPage extends Component {
                                 </ModalBody>
 
                                 <ModalFooter>                                    
-                                    <button className='btn btn-success' onClick={() => {this.addReft()}}>Insert</button>
+                                    <button className='btn btn-success' onClick={() => {this.peticionPostAddRefProductToCatalog()}}>Insert</button>
                                     <Button color='secundary' onClick={this.modalAddRef}>Cancel</Button>
                                 </ModalFooter>
                             </Modal>
